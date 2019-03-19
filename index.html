@@ -90,20 +90,20 @@ const Board = (props) => {
         pos3 = winCase[i][2];
         if ((current[pos1] === current[pos2]) && (current[pos3] === 0)){
           // return pos3;
-          if (current[pos1] === 2){
+          if (current[pos1] === 2 && current[pos1] === 2){
             return pos3;
           }
           winBoard.push(pos3);
         } else if ((current[pos1] === current[pos3]) && (current[pos2] === 0)){
           // return pos2;
-          if (current[pos1] === 2){
+          if (current[pos1] === 2 && current[pos3] === 2){
             return pos2;
           }
           winBoard.push(pos2);
         }
         else if ((current[pos3] === current[pos2]) && (current[pos1] === 0)){
           // return pos1;
-          if (current[pos2] === 2){
+          if (current[pos2] === 2 && current[pos3] === 2){
             return pos1;
           }
           winBoard.push(pos1);
