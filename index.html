@@ -44,7 +44,6 @@ const Board = (props) => {
   }
 
   function ai(){
-    console.log("AI TURN");
     //observe the current board
     let avail = [];
     for (let i=0;i<current.length;i++){
@@ -83,6 +82,7 @@ const Board = (props) => {
       [3,4,5],
       [6,7,8]];
     let pos1, pos2, pos3;
+    let blockBoard = [];
     let winBoard = [];
     for(let i = 0;i<winCase.length;i++){
         pos1 = winCase[i][0];
@@ -90,14 +90,20 @@ const Board = (props) => {
         pos3 = winCase[i][2];
         if ((current[pos1] === current[pos2]) && (current[pos3] === 0)){
           // return pos3;
-          if (current[pos1] === 2 && current[pos1] === 2){
+          if (current[pos1] === 2 && current[pos2] === 2){
             return pos3;
+          }
+          if (current[pos1] === 1 && current[pos1] === 1){
+            blockBoard.push(pos3);
           }
           winBoard.push(pos3);
         } else if ((current[pos1] === current[pos3]) && (current[pos2] === 0)){
           // return pos2;
           if (current[pos1] === 2 && current[pos3] === 2){
             return pos2;
+          }
+          if (current[pos1] === 1 && current[pos3] === 1){
+              blockBoard.push(pos2);
           }
           winBoard.push(pos2);
         }
@@ -106,10 +112,15 @@ const Board = (props) => {
           if (current[pos2] === 2 && current[pos3] === 2){
             return pos1;
           }
+          if (current[pos2] === 1 && current[pos3] === 1){
+            blockBoard.push(pos1);
+          }
           winBoard.push(pos1);
         }
     }
-      if (winBoard.length < 1){
+      if (blockBoard.length > 0){
+        return blockBoard[0];
+      } else if (winBoard.length < 1){
         return -1;
       }
       else {
@@ -196,6 +207,7 @@ const Board = (props) => {
   }
 
   function testEndGame(){
+    console.log("TEST END GAME", moves)
     let tied = false;
     let winCase= [[0,1,2],
     [0,4,8],
@@ -220,7 +232,7 @@ const Board = (props) => {
         }
         break;
       } else {
-        if (moves >4 && tied === false){
+        if (moves >= 4 && tied === false){
           tied = true;
           flipOver(true);
           endGame('ties');
