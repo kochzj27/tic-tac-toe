@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Tic Tac Toe App</title>
+  <script src="node_modules/react/umd/react.development.js"></script>
+  <script src="node_modules/react-dom/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="styles.css">
+
+</head>
+
+<body>
+  <div id='app'></div>
+</body>
+<script type='text/babel'>
+
+const Tile = (props) => {
+  return (
+    <div className={`tile tile${props.pos}`} onClick={() => props.click(props.pos-1)}><span className='text'>{props.value}</span></div>
+  )
+}
+
+const Board = (props) => {
+  const [current, updateBoard] = React.useState([0,0,0,0,0,0,0,0,0]);
+  const [xturn, switchTurn] = React.useState(true);
+  const [moves, upMoves] = React.useState(0);
+  const [over, flipOver] = React.useState(false);
+
+  let chart = {
+    0: '\u00A0',
+    1: 'X',
+    2: 'O'
+  }
+
+  function clearRecords(){
+    localStorage.removeItem('xwin');
+    localStorage.removeItem('owin');
+    localStorage.removeItem('ties');
+    props.reset();
+  }
+
+  function ai(){
+    console.log("AI TURN");
+    //observe the current board
+    let avail = [];
+    for (let i=0;i<current.length;i++){
+      if(current[i] === 0){
+        avail.push(i);
+      }
+    }
+    //if middle space is open, make that move else,block, else win
+    if (current[4] === 0){
+      aiClickTile(4);
+    }
+    else {
+      let pos = aiCheckWin();
+      if (pos != -1){
+        aiClickTile(pos);
+      } else {
+        aiClickTile(avail[0]);
+      }
+    }
+    // else {
+    // // make next available move
+    // aiClickTile(avail[0]);
+    // }
+    // block the user
+
+  }
+
+  function aiCheckWin(){
+    let winCase =
+      [[0,1,2],
+      [0,4,8],
+      [0,3,6],
+      [1,4,7],
+      [2,5,8],
+      [2,4,6],
+      [3,4,5],
+      [6,7,8]];
+    let pos1, pos2, pos3;
+    let winBoard = [];
+    for(let i = 0;i<winCase.length;i++){
+        pos1 = winCase[i][0];
+        pos2 = winCase[i][1];
+        pos3 = winCase[i][2];
+        if ((current[pos1] === current[pos2]) && (current[pos3] === 0)){
+          // return pos3;
+          if (current[pos1] === 2){
+            return pos3;
+          }
+          winBoard.push(pos3);
+        } else if ((current[pos1] === current[pos3]) && (current[pos2] === 0)){
+          // return pos2;
+          if (current[pos1] === 2){
+            return pos2;
+          }
+          winBoard.push(pos2);
+        }
+        else if ((current[pos3] === current[pos2]) && (current[pos1] === 0)){
+          // return pos1;
+          if (current[pos2] === 2){
+            return pos1;
+          }
+          winBoard.push(pos1);
+        }
+    }
+      if (winBoard.length < 1){
+        return -1;
+      }
+      else {
+        return winBoard[0];
+      }
+  }
+
+  function aiClickTile(e){ // 0's move
+      let curr = current;
+      if (current[e] === 0){
+          curr[e] = 2; //if X
+          switchTurn(false);
+          props.updateTurn(false);
+          upMoves(moves + 1);
+          updateBoard(curr);
+          if (moves >= 1){
+            setTimeout( () => { testEndGame() }, 10);
+          }
+      }
+  }
+
+    function clickTile(e){ // x's move
+      let curr = current;
+      if (current[e] === 0){
+          curr[e] = 1; //if X
+          switchTurn(false);
+          props.updateTurn(false);
+          upMoves(moves + 1);
+          updateBoard(curr);
+          if (moves >= 4){
+            setTimeout( () => { testEndGame() }, 10);
+          }
+          if (!over){
+          setTimeout( () => { ai() }, 300);
+          }
+      }
+  }
+
+  // function clickTile(e){
+  //   let curr = current;
+  //   if (current[e] === 0){
+  //     if (xturn){
+  //       curr[e] = 1; //if X
+  //       switchTurn(false);
+  //       props.updateTurn(false);
+  //     } else {
+  //       curr[e] = 2; // if O
+  //       switchTurn(true);
+  //       props.updateTurn(true);
+  //     }
+  //     upMoves(moves + 1);
+  //     updateBoard(curr);
+  //     if (moves >= 4){
+  //       setTimeout( () => { testEndGame() }, 10);
+  //     }
+  //   }
+  // }
+
+  function newGame(){
+    updateBoard([0,0,0,0,0,0,0,0,0]);
+    switchTurn(true);
+    flipOver(false);
+    upMoves(0);
+    props.updateTurn(true);
+  }
+
+  function endGame(winner){
+    props.winner(winner); // xwin, owin, ties
+    switch(winner){
+      case "xwin": {
+        alert("X wins!");
+        break;
+      }
+      case "owin": {
+        alert("O wins!");
+        break;
+      }
+      default: {
+        alert("It was a tie.");
+        break;
+      }
+    }
+    newGame();
+  }
+
+  function testEndGame(){
+    let tied = false;
+    let winCase= [[0,1,2],
+    [0,4,8],
+    [0,3,6],
+    [1,4,7],
+    [2,5,8],
+    [2,4,6],
+    [3,4,5],
+    [6,7,8]];
+    let pos1, pos2, pos3;
+    for(let i = 0;i<winCase.length;i++){
+        pos1 = winCase[i][0];
+        pos2 = winCase[i][1];
+        pos3 = winCase[i][2];
+      if ((current[pos1] === current[pos2]) && (current[pos2] === current[pos3]) && current[pos3] !== 0){
+        if (current[pos1] === 1){
+          flipOver(true);
+          endGame('xwin');
+        } else {
+          flipOver(true);
+          endGame('owin');
+        }
+        break;
+      } else {
+        if (moves >4 && tied === false){
+          tied = true;
+          flipOver(true);
+          endGame('ties');
+        }
+      }
+    }
+  }
+
+  let gameBoard = current.map((tile, idx) => {
+    return (<Tile key={idx} value={chart[current[idx]]} pos={idx+1} click={clickTile}/>)
+  });
+
+return (
+  <div>
+  <div className='board'>
+  {gameBoard}
+  </div>
+  <button className='newGame' onClick={newGame}>New Game</button>
+  <button className='clearRecords' onClick={clearRecords}>Reset Records</button>
+  </div>
+)
+
+}
+
+class App extends React.Component {
+    constructor(props){
+        super(props);
+        this.state = {
+          currentTurn: "X",
+          xwin: localStorage.getItem('xwin') ? localStorage.getItem('xwin') : 0,
+          owin: localStorage.getItem('owin') ? localStorage.getItem('owin') : 0,
+          ties: localStorage.getItem('ties') ? localStorage.getItem('ties') : 0
+     }
+     this.updateTurn = this.updateTurn.bind(this);
+     this.updateWins = this.updateWins.bind(this);
+     this.resetWins = this.resetWins.bind(this);
+    }
+
+  updateTurn(turn){
+    this.setState({
+      currentTurn: turn ? "X" : "O",
+    });
+  }
+
+  updateWins(win){
+    let oldWins = this.state[win];
+    oldWins++;
+    this.setState({
+      [win]: oldWins,
+    });
+    localStorage.setItem(`${win}`, oldWins);
+  }
+
+  resetWins(){
+    this.setState({
+      xwin: 0,
+      owin: 0,
+      ties: 0
+    });
+  }
+
+    render(){
+
+        return (
+          <div className='main'>
+          <h1 className='title'>Tic Tac Toe</h1>
+          <div className='stats'>
+          <h3>Turn: {this.state.currentTurn}</h3>
+          <h3>X-O Record: {this.state.xwin}-{this.state.owin}-{this.state.ties}</h3>
+          </div>
+          <Board updateTurn={this.updateTurn} winner={this.updateWins} reset={this.resetWins} />
+        </div>
+        )
+    }
+}
+
+  ReactDOM.render(<App  />, document.getElementById('app'));
+
+
+</script>
+
+</html>
