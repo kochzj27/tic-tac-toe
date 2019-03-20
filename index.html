@@ -28,7 +28,7 @@ const Board = (props) => {
   const [current, updateBoard] = React.useState([0,0,0,0,0,0,0,0,0]);
   const [xturn, switchTurn] = React.useState(true);
   const [moves, upMoves] = React.useState(0);
-  const [over, flipOver] = React.useState(false);
+  var over = false;
 
   let chart = {
     0: '\u00A0',
@@ -45,6 +45,7 @@ const Board = (props) => {
 
   function ai(){
     //observe the current board
+    if (!over){
     let avail = [];
     for (let i=0;i<current.length;i++){
       if(current[i] === 0){
@@ -56,12 +57,13 @@ const Board = (props) => {
       aiClickTile(4);
     }
     else {
-      let pos = aiCheckWin();
+      let pos = aiCheckWin(avail);
       if (pos != -1){
         aiClickTile(pos);
       } else {
         aiClickTile(avail[0]);
       }
+    }
     }
     // else {
     // // make next available move
@@ -71,7 +73,8 @@ const Board = (props) => {
 
   }
 
-  function aiCheckWin(){
+  function aiCheckWin(avail){
+    console.log(avail)
     let winCase =
       [[0,1,2],
       [0,4,8],
@@ -118,13 +121,14 @@ const Board = (props) => {
           winBoard.push(pos1);
         }
     }
-      if (blockBoard.length > 0){
-        return blockBoard[0];
-      } else if (winBoard.length < 1){
-        return -1;
-      }
-      else {
+      if (winBoard.length > 0){
         return winBoard[0];
+      } else if (blockBoard.length > 0){
+        return blockBoard[0];
+      } else {
+        let randomSpot = Math.floor(Math.random() * avail.length);
+        console.log(randomSpot)
+        return avail[randomSpot];
       }
   }
 
@@ -154,7 +158,7 @@ const Board = (props) => {
             setTimeout( () => { testEndGame() }, 10);
           }
           if (!over){
-          setTimeout( () => { ai() }, 300);
+            setTimeout( () => { ai() }, 300);
           }
       }
   }
@@ -182,7 +186,7 @@ const Board = (props) => {
   function newGame(){
     updateBoard([0,0,0,0,0,0,0,0,0]);
     switchTurn(true);
-    flipOver(false);
+    over = false;
     upMoves(0);
     props.updateTurn(true);
   }
@@ -214,8 +218,9 @@ const Board = (props) => {
     [1,4,7],
     [2,5,8],
     [2,4,6],
-    [3,4,5],
-    [6,7,8]];
+    [6,7,8],
+    [3,4,5]
+    ];
     let pos1, pos2, pos3;
     for(let i = 0;i<winCase.length;i++){
         pos1 = winCase[i][0];
@@ -223,17 +228,17 @@ const Board = (props) => {
         pos3 = winCase[i][2];
       if ((current[pos1] === current[pos2]) && (current[pos2] === current[pos3]) && current[pos3] !== 0){
         if (current[pos1] === 1){
-          flipOver(true);
+          over = true;
           endGame('xwin');
         } else {
-          flipOver(true);
+          over = true;
           endGame('owin');
         }
         break;
       } else {
         if (moves >= 4 && tied === false){
           tied = true;
-          flipOver(true);
+          over = true;
           endGame('ties');
         }
       }
