@@ -135,9 +135,9 @@ const Board = (props) => {
   function aiClickTile(e){ // 0's move
       let curr = current;
       if (current[e] === 0){
-          curr[e] = 2; //if X
-          switchTurn(false);
-          props.updateTurn(false);
+          curr[e] = 2; //if O
+          switchTurn(true);
+          props.updateTurn(true);
           upMoves(moves + 1);
           updateBoard(curr);
           if (moves >= 1){
@@ -148,7 +148,7 @@ const Board = (props) => {
 
     function clickTile(e){ // x's move
       let curr = current;
-      if (current[e] === 0){
+      if (current[e] === 0 && xturn === true){
           curr[e] = 1; //if X
           switchTurn(false);
           props.updateTurn(false);
@@ -163,25 +163,6 @@ const Board = (props) => {
       }
   }
 
-  // function clickTile(e){
-  //   let curr = current;
-  //   if (current[e] === 0){
-  //     if (xturn){
-  //       curr[e] = 1; //if X
-  //       switchTurn(false);
-  //       props.updateTurn(false);
-  //     } else {
-  //       curr[e] = 2; // if O
-  //       switchTurn(true);
-  //       props.updateTurn(true);
-  //     }
-  //     upMoves(moves + 1);
-  //     updateBoard(curr);
-  //     if (moves >= 4){
-  //       setTimeout( () => { testEndGame() }, 10);
-  //     }
-  //   }
-  // }
 
   function newGame(){
     updateBoard([0,0,0,0,0,0,0,0,0]);
